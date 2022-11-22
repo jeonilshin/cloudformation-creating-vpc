@@ -9,32 +9,42 @@ Parameters:
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
     Type: String
-    Default: "wscf-manage"
+    Default: "skills"
 
   VpcCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC
     Type: String
-    Default: 10.105.0.0/16
+    Default: 10.0.0.0/16
 
   PublicSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
     Type: String
-    Default: 10.105.100.0/24
+    Default: 10.0.3.0/24
 
   PublicSubnet2CIDR:
     Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
     Type: String
-    Default: 10.105.102.0/24
+    Default: 10.0.4.0/24
+
+  PublicSubnet3CIDR:
+    Description: Please enter the IP range (CIDR notation) for the public subnet in the third Availability Zone
+    Type: String
+    Default: 10.0.5.0/24
 
   PrivateSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the first Availability Zone
     Type: String
-    Default: 10.105.200.0/24
+    Default: 10.0.0.0/24
 
   PrivateSubnet2CIDR:
     Description: Please enter the IP range (CIDR notation) for the private subnet in the second Availability Zone
     Type: String
-    Default: 10.105.202.0/24
+    Default: 10.0.1.0/24
+
+  PrivateSubnet3CIDR:
+    Description: Please enter the IP range (CIDR notation) for the private subnet in the third Availability Zone
+    Type: String
+    Default: 10.0.2.0/24
 
 Resources:
   VPC:
@@ -45,14 +55,14 @@ Resources:
       EnableDnsHostnames: true
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}.vpc
+          Value: !Sub ${EnvironmentName}-vpc
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}.igw
+          Value: !Sub ${EnvironmentName}-igw
 
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -69,18 +79,29 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}.pub-a
+          Value: !Sub ${EnvironmentName}-public-a
 
   PublicSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 2, !GetAZs  '' ]
+      AvailabilityZone: !Select [ 1, !GetAZs  '' ]
       CidrBlock: !Ref PublicSubnet2CIDR
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}.pub-c
+          Value: !Sub ${EnvironmentName}-public-b
+
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 2, !GetAZs  '' ]
+      CidrBlock: !Ref PublicSubnet3CIDR
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-public-c
 
   PrivateSubnet1:
     Type: AWS::EC2::Subnet
@@ -91,7 +112,7 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}.priv-a
+          Value: !Sub ${EnvironmentName}-private-a
 
   PrivateSubnet2:
     Type: AWS::EC2::Subnet
@@ -102,7 +123,18 @@ Resources:
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}.priv-c
+          Value: !Sub ${EnvironmentName}-private-b
+
+  PrivateSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 2, !GetAZs  '' ]
+      CidrBlock: !Ref PrivateSubnet3CIDR
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-private-c
 
   NatGateway1EIP:
     Type: AWS::EC2::EIP
@@ -116,6 +148,12 @@ Resources:
     Properties:
       Domain: vpc
 
+  NatGateway3EIP:
+    Type: AWS::EC2::EIP
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      Domain: vpc
+
   NatGateway1:
     Type: AWS::EC2::NatGateway
     Properties:
@@ -123,7 +161,7 @@ Resources:
       SubnetId: !Ref PublicSubnet1
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}.nat-a
+          Value: !Sub ${EnvironmentName}-nat-a
 
   NatGateway2:
     Type: AWS::EC2::NatGateway
@@ -132,7 +170,16 @@ Resources:
       SubnetId: !Ref PublicSubnet2
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}.nat-c
+          Value: !Sub ${EnvironmentName}-nat-b
+
+  NatGateway3:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway3EIP.AllocationId
+      SubnetId: !Ref PublicSubnet3
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-nat-c
 
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
@@ -140,7 +187,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}.pub-rt
+          Value: !Sub ${EnvironmentName}-public-rt
 
   DefaultPublicRoute:
     Type: AWS::EC2::Route
@@ -162,6 +209,11 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet2
 
+  PublicSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet3
 
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
@@ -169,7 +221,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}.priv-rt-a
+          Value: !Sub ${EnvironmentName}-private-a-rt
 
   DefaultPrivateRoute1:
     Type: AWS::EC2::Route
@@ -190,7 +242,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}.priv-rt-c
+          Value: !Sub ${EnvironmentName}-private-b-rt
 
   DefaultPrivateRoute2:
     Type: AWS::EC2::Route
@@ -205,6 +257,27 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
 
+  PrivateRouteTable3:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-private-c-rt
+
+  DefaultPrivateRoute3:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway3
+
+  PrivateSubnet3RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      SubnetId: !Ref PrivateSubnet3
+
 Outputs:
   VPC:
     Description: A reference to the created VPC
@@ -212,11 +285,11 @@ Outputs:
 
   PublicSubnets:
     Description: A list of the public subnets
-    Value: !Join [ ",", [ !Ref PublicSubnet1, !Ref PublicSubnet2 ]]
+    Value: !Join [ ",", [ !Ref PublicSubnet1, !Ref PublicSubnet2, !Ref PublicSubnet3 ]]
 
   PrivateSubnets:
     Description: A list of the private subnets
-    Value: !Join [ ",", [ !Ref PrivateSubnet1, !Ref PrivateSubnet2 ]]
+    Value: !Join [ ",", [ !Ref PrivateSubnet1, !Ref PrivateSubnet2, !Ref PrivateSubnet3 ]]
 
   PublicSubnet1:
     Description: A reference to the public subnet in the 1st Availability Zone
@@ -226,6 +299,10 @@ Outputs:
     Description: A reference to the public subnet in the 2nd Availability Zone
     Value: !Ref PublicSubnet2
 
+  PublicSubnet3:
+    Description: A reference to the public subnet in the 3rd Availability Zone
+    Value: !Ref PublicSubnet3
+    
   PrivateSubnet1:
     Description: A reference to the private subnet in the 1st Availability Zone
     Value: !Ref PrivateSubnet1
@@ -233,4 +310,8 @@ Outputs:
   PrivateSubnet2:
     Description: A reference to the private subnet in the 2nd Availability Zone
     Value: !Ref PrivateSubnet2
+
+  PrivateSubnet3:
+    Description: A reference to the private subnet in the 3rd Availability Zone
+    Value: !Ref PrivateSubnet3
 ```

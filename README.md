@@ -1,4 +1,5 @@
 # YAML FILE
+#### use this file using visual studio code while making this vpc template
 ```
 Description:  This template deploys a VPC, with a pair of public and private subnets spread
   across two Availability Zones. It deploys an internet gateway, with a default
@@ -315,3 +316,6 @@ Outputs:
     Description: A reference to the private subnet in the 3rd Availability Zone
     Value: !Ref PrivateSubnet3
 ```
+## Save it in Desktop
+## aws cloudformation create-stack --stack-name skills-vpc --template-body file://vpc.yml
+#### links used: msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi

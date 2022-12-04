@@ -1,0 +1,13 @@
+  BasitonSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: bastion-sg
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 2220
+          ToPort: 2220
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: bastion-sg

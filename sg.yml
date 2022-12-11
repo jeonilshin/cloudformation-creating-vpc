@@ -1,4 +1,4 @@
-  BasitonSecurityGroup:
+  BastionSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: bastion-sg

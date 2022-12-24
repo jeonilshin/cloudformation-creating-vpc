@@ -17,7 +17,7 @@ Parameters:
   PublicSubnet1CIDR:
     Description: Please enter the IP range (CIDR notation) for the public subnet in the first Availability Zone
     Type: String
-    Default: 172.16.0.0/24
+    Default: 172.16.0.0/16
 
 Resources:
   VPC:

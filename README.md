@@ -456,7 +456,7 @@ Resources:
     Properties:
       Domain: vpc
 
- NatGateway1:
+  NatGateway1:
     Type: AWS::EC2::NatGateway
     Properties:
       AllocationId: !GetAtt NatGateway1EIP.AllocationId

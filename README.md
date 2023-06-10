@@ -401,7 +401,6 @@ Resources:
           - SubnetPart: '01::/64'
             VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
       MapPublicIpOnLaunch: true
-      EnableDns64: true
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-pub-sn-a
@@ -419,7 +418,6 @@ Resources:
           - SubnetPart: '02::/64'
             VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
       MapPublicIpOnLaunch: true
-      EnableDns64: true
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-pub-sn-c
@@ -438,6 +436,7 @@ Resources:
           - SubnetPart: '11::/64'
             VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
       MapPublicIpOnLaunch: false
+      EnableDns64: true      
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-private-a
@@ -456,6 +455,7 @@ Resources:
           - SubnetPart: '12::/64'
             VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
       MapPublicIpOnLaunch: false
+      EnableDns64: true
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-private-c

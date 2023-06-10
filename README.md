@@ -424,7 +424,7 @@ Resources:
       AvailabilityZone: !Select [ 0, !GetAZs  '' ]
       CidrBlock: !Ref PrivateSubnet1CIDR
       AssignIpv6AddressOnCreation: true
-      Ipv6CidrBlock: !Select [ 11, !Cidr [ !Select [ 11, !GetAtt VPC.Ipv6CidrBlocks], 256, 64 ]]
+      Ipv6CidrBlock: !Select [ 11, !Cidr [ !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks], 256, 64 ]]
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
@@ -435,10 +435,10 @@ Resources:
     DependsOn: Ipv6CidrBlock
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 0, !GetAZs  '' ]
+      AvailabilityZone: !Select [ 2, !GetAZs  '' ]
       CidrBlock: !Ref PrivateSubnet2CIDR
       AssignIpv6AddressOnCreation: true
-      Ipv6CidrBlock: !Select [ 12, !Cidr [ !Select [ 12, !GetAtt VPC.Ipv6CidrBlocks], 256, 64 ]]
+      Ipv6CidrBlock: !Select [ 12, !Cidr [ !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks], 256, 64 ]]
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
